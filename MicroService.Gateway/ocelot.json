@@ -1,0 +1,78 @@
+{
+  "DynamicRoutes": [
+    {
+      "ServiceName": "user-service",
+      "RateLimitRule": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1000.0,
+        "Limit": 3
+      }
+    }
+  ],
+  "Routes": [
+    {
+      "Servicename": "user-service",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/user/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UseServiceDiscovery": true,
+      "RouteIsCaseSensitive": false,
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      //"QoSOptions": {
+      //  "ExceptionsAllowedBeforeBreaking": 3, // 熔断阈值
+      //  "DurationOfBreak": 5000, // 熔断持续时间(ms)
+      //  "TimeoutValue": 2000, // 超时时间(ms)
+      //  "Retries": 3 // 重试次数
+      //},
+      //"HttpHandlerOptions": {
+      //  "UseTracing": true
+      //}
+    },
+    {
+      "Servicename": "auth-service",
+      "DownstreamPathTemplate": "/auth/login",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/auth/login",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UseServiceDiscovery": true,
+      "RouteIsCaseSensitive": false,
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+      //"QoSOptions": {
+      //  "ExceptionsAllowedBeforeBreaking": 3, // 熔断阈值
+      //  "DurationOfBreak": 5000, // 熔断持续时间(ms)
+      //  "TimeoutValue": 2000, // 超时时间(ms)
+      //  "Retries": 3 // 重试次数
+      //},
+      //"HttpHandlerOptions": {
+      //  "UseTracing": true
+      //}
+    }
+
+  ],
+  "GlobalConfiguration": {
+    "RequestIdKey": "OcelotRequestId",
+    "UseServiceDiscovery": true,
+    "ServiceDiscoveryProvider": {
+      //"ServiceName": "ocelot-gateway",
+      "Host": "127.0.0.1",
+      "Port": 8500,
+      "Type": "Consul"
+      //"PollingInterval": 100
+    }
+    //"QoSOptions": {
+    //  "ExceptionsAllowedBeforeBreaking": 3,
+    //  "DurationOfBreak": 5000,
+    //  "TimeoutValue": 5000
+    //}
+  }
+}
