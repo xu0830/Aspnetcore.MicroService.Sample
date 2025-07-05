@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MicroService.Models.Entity
 {
     [Table("SysUser")]
-    public record SysUser
+    public record SysUser : BaseEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
@@ -20,21 +20,31 @@ namespace MicroService.Models.Entity
         /// </summary>
         [Description("用户登录帐号")]
         public required string Account { get; set; }
+
         /// <summary>
         /// 密码
         /// </summary>
         [Description("密码")]
         public required string Password { get; set; }
+
         /// <summary>
         /// 用户姓名
         /// </summary>
-        [Description("用户姓名")]
-        public required string Name { get; set; }
+        [Description("真实姓名")]
+        public required string RealName { get; set; }
+
+        /// <summary>
+        /// 手机号
+        /// </summary>
+        [Description("手机号")]
+        public required string Phone { get; set; }
+
         /// <summary>
         /// 性别
         /// </summary>
         [Description("性别")]
         public int Sex { get; set; }
+
         /// <summary>
         /// 用户状态
         /// </summary>
@@ -48,18 +58,15 @@ namespace MicroService.Models.Entity
         /// <summary>
         /// 经办时间
         /// </summary>
-        [Description("经办时间")]
-        public System.DateTime CreateTime { get; set; }
-        /// <summary>
-        /// 创建人
-        /// </summary>
-        [Description("创建人")]
-        public string? CreateId { get; set; }
+        [Description("创建时间")]
+        public DateTime CreateTime { get; set; } = DateTime.Now; 
+
         /// <summary>
         /// 分类名称
         /// </summary>
         [Description("分类名称")]
         public string? TypeName { get; set; }
+
         /// <summary>
         /// 分类ID
         /// </summary>
@@ -72,6 +79,13 @@ namespace MicroService.Models.Entity
         [Description("直接上级")]
         public string? ParentId { get; set; }
 
+        public override void GenerateDefaultKeyVal()
+        {
+        }
 
+        public override bool KeyIsNull()
+        {
+            return false;
+        }
     }
 }

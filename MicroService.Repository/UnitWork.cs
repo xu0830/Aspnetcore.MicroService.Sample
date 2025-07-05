@@ -123,13 +123,13 @@ namespace MicroService.Repository
         /// <summary>
         /// 新增对象，如果Id为空，则会自动创建默认Id
         /// </summary>
-        public void Add<T>(T entity) where T : BaseEntity
+        public async ValueTask<T> AddAsync<T>(T entity) where T : BaseEntity
         {
             if (entity.KeyIsNull())
             {
                 entity.GenerateDefaultKeyVal();
             }
-            _context.Set<T>().Add(entity);
+            return (await _context.Set<T>().AddAsync(entity)).Entity;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using Consul;
+using MicroService.Infrastructure.Filter;
 using MicroService.Infrastructure.HostService;
 using MicroService.Models.Options;
 using MicroService.Repository;
@@ -19,6 +20,9 @@ namespace MicroService.User.API
 
             builder.Services.AddControllers();
 
+            #region consul 依赖注入、服务注册
+            //  方式1、依赖注入、Hostservice 服务注册、健康检查 自动重连
+            //  服务间调用通过DelegatingHandler将请求地址转发到实际的服务地址端口
             //builder.Services.Configure<ConsulConfig>(builder.Configuration.GetSection("ConsulConfig"));
             //builder.Services.AddSingleton<IConsulClient>(provider =>
             //    new ConsulClient(config => {
@@ -27,14 +31,21 @@ namespace MicroService.User.API
             //);
             //builder.Services.AddHostedService<ConsulRegistrationService>();
 
+            //  方式2、基于 Steeltoe.Discovery.Consul 实现的 服务注册、发现
             builder.Services.AddServiceDiscovery(o => o.UseConsul());
+            #endregion
 
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddDbContext<AppDbContext>(options => 
+
+            #region 数据库服务
+            builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(builder.Configuration.GetConnectionString("AppDbContext"), new MySqlServerVersion(new Version(8, 0, 11))));
-            
-            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped(typeof(IUnitWork<>), typeof(UnitWork<>));
+            #endregion
+
+            builder.Services.Configure<AESEncryptOption>(builder.Configuration.GetSection("AESEncrypt"));
+
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddMiniProfiler(options =>
             {
                 // 设定访问分析结果URL的路由基地址
@@ -46,7 +57,6 @@ namespace MicroService.User.API
                 options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
                 //  options.IgnoredPaths.Add("/swagger/");
             }).AddEntityFramework(); //显示SQL语句及耗时
-            
 
             var app = builder.Build();
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MicroService.Models.Entity
 {
-    public abstract class BaseEntity
+    public abstract record class BaseEntity
     {
         /// <summary>
         /// 判断主键是否为空，常用做判定操作是【添加】还是【编辑】

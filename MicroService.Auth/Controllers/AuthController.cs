@@ -1,6 +1,10 @@
 ﻿using MicroService.Auth.Service.IService;
+using MicroService.Infrastructure.Extension;
+using MicroService.Infrastructure.Http;
+using MicroService.Infrastructure.Security;
 using MicroService.Models.DTOS;
 using MicroService.Models.Entity;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,31 +14,32 @@ using System.Text;
 
 namespace MicroService.Auth.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly ITokenService _tokenService;
 
         private readonly IConfiguration _configuration;
 
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClient _httpClient;
 
-        public AuthController(ITokenService tokenService, IConfiguration configuration, IHttpClientFactory clientFactory)
+        public AuthController(ITokenService tokenService, IConfiguration configuration, IHttpClient httpClient)
         {
             _tokenService = tokenService;
             _configuration = configuration;
-            _httpClient = clientFactory.CreateClient("DiscoveryRandom");
+            _httpClient = httpClient;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var result = await _httpClient.PostAsync("http://user-service/user/loginGetUser", new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json"));
+            var result = await _httpClient.PostAsync<LoginModel, SysUser>("http://user-service/user/loginGetUser", model);
 
-            //var result = await _clientFactory.CreateClient("user").PostAsync("/user/loginGetUser", JsonContent.Create(model, new MediaTypeHeaderValue("application/json")));
             var user = new SysUser()
             {
-                Name = "",
+                RealName = "",
+                Phone = "",
                 Account = "",
                 Password = ""
             };
@@ -43,7 +48,7 @@ namespace MicroService.Auth.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Name, user.RealName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 //new Claim(ClaimTypes.Role, user.Role)
@@ -64,6 +69,18 @@ namespace MicroService.Auth.Controllers
             });
         }
 
+        [HttpPost("register")]
+        public async Task<ResponseResult<object>> Register([FromBody] RegisterModel model)
+        {
+            if (!PhoneValidator.IsValidPhoneNo(model?.Phone))
+            {
+                return ResultFail<object>("手机号不合法");    
+            }
+
+            return await _httpClient.PostAsync<RegisterModel, object>("http://user-service/user/addUser", model);
+        }
+
+
         [HttpPost("refresh-token")]
         public IActionResult RefreshToken([FromBody] RefreshTokenModel model)
         {
@@ -74,7 +91,8 @@ namespace MicroService.Auth.Controllers
 
             var user = new UserInfo()
             {
-                Name = "xcj",
+                RealName = "xcj",
+                Phone = "xcj",
                 Account = "xx@163.com",
                 Password = "123456",
                 //Phone = "1342",

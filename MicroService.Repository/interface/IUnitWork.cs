@@ -39,7 +39,7 @@ namespace MicroService.Repository.@interface
         /// <summary>
         /// 新增对象，如果Id为空，则会自动创建默认Id
         /// </summary>
-        void Add<T>(T entity) where T : BaseEntity;
+        ValueTask<T> AddAsync<T>(T entity) where T : BaseEntity;
 
         /// <summary>
         /// 批量新增对象，如果对象Id为空，则会自动创建默认Id
