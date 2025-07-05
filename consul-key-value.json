@@ -1,0 +1,44 @@
+{
+    "Routes": [{
+            "Servicename": "user-service",
+            "DownstreamPathTemplate": "/{everything}",
+            "DownstreamScheme": "http",
+            "UpstreamPathTemplate": "/user/{everything}",
+            "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
+            "UseServiceDiscovery": true,
+            "RouteIsCaseSensitive": false,
+            "LoadBalancerOptions": {
+                "Type": "RoundRobin"
+            },
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        }, {
+            "Servicename": "auth-service",
+            "DownstreamPathTemplate": "/auth/login",
+            "DownstreamScheme": "http",
+            "UpstreamPathTemplate": "/auth/login",
+            "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
+            "UseServiceDiscovery": true,
+            "RouteIsCaseSensitive": false,
+            "LoadBalancerOptions": {
+                "Type": "RoundRobin"
+            },
+            "Errors": {
+                "ServicesAreEmptyError": {
+                    "StatusCode": 503,
+                    "Message": "Service Temporarily Unavailable"
+                }
+            }
+        }
+    ],
+    "GlobalConfiguration": {
+        "ServiceDiscoveryProvider": {
+            "Host": "127.0.0.1",
+            "Port": 8500,
+            "Type": "PollConsul",
+            "ConfigurationKey": "ocelot/config",
+            "PollingInterval": 30000
+        }
+    }
+}
