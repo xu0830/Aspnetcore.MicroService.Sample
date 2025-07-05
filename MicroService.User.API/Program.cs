@@ -31,7 +31,7 @@ namespace MicroService.User.API
             //);
             //builder.Services.AddHostedService<ConsulRegistrationService>();
 
-            //  方式2、基于 Steeltoe.Discovery.Consul 实现的 服务注册、发现
+            //  方式2、基于 Steeltoe.Discovery.Consul 实现的 服务注册（自动重连）、发现
             builder.Services.AddServiceDiscovery(o => o.UseConsul());
             #endregion
 
@@ -42,8 +42,6 @@ namespace MicroService.User.API
                 options.UseMySql(builder.Configuration.GetConnectionString("AppDbContext"), new MySqlServerVersion(new Version(8, 0, 11))));
             builder.Services.AddScoped(typeof(IUnitWork<>), typeof(UnitWork<>));
             #endregion
-
-            builder.Services.Configure<AESEncryptOption>(builder.Configuration.GetSection("AESEncrypt"));
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddMiniProfiler(options =>

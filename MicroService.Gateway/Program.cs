@@ -72,7 +72,7 @@ namespace MicroService.Gateway
                 .AddOcelot()                
                 .AddDelegatingHandler<OcelotExceptionHandler>()
                 .AddConsul<CustomConsulServiceBuilder>()
-                .AddPolly();
+                .AddConfigStoredInConsul().AddPolly();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
             var app = builder.Build();
@@ -111,21 +111,21 @@ namespace MicroService.Gateway
                         await next.Invoke();
                     }
                 };
-                config.ResponderMiddleware = async (ctx, next) =>
-                {
-                    await next.Invoke();
-                    var errors = ctx.Items.Errors();
+                //config.ResponderMiddleware = async (ctx, next) =>
+                //{
+                //    await next.Invoke();
+                //    var errors = ctx.Items.Errors();
 
-                    if (errors?.Count > 0)
-                    {
-                        // 自定义错误响应
-                        await ctx.Response.WriteAsJsonAsync(new
-                        {
-                            Code = "ServiceUnavailable",
-                            Errors = errors.Select(e => e.Message)
-                        });
-                    }
-                };
+                //    if (errors?.Count > 0)
+                //    {
+                //        // 自定义错误响应
+                //        await ctx.Response.WriteAsJsonAsync(new
+                //        {
+                //            Code = "ServiceUnavailable",
+                //            Errors = errors.Select(e => e.Message)
+                //        });
+                //    }
+                //};
             });
 
             app.Run();

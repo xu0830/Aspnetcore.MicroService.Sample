@@ -20,12 +20,10 @@ namespace MicroService.User.Service.Service
     {
         private readonly IUnitWork<AppDbContext> _unitWork;
 
-        private readonly AESEncryptOption _encryptOption;
 
-        public UserService(IUnitWork<AppDbContext> unitWork, IOptions<AESEncryptOption> encryptOption) 
+        public UserService(IUnitWork<AppDbContext> unitWork) 
         {
             _unitWork = unitWork;
-            _encryptOption = encryptOption.Value;
         }
 
         public async Task<bool> AddUser(RegisterModel user)
@@ -34,7 +32,7 @@ namespace MicroService.User.Service.Service
             {
                 Account = user.Account,
                 RealName = user.RealName,
-                Password = EncryUtils.AESEncrypt(user.Password, _encryptOption.Secret),
+                Password = Pbkdf2Hasher.HashPassword(user.Password),
                 Phone = user.Phone
             });
 
@@ -43,8 +41,12 @@ namespace MicroService.User.Service.Service
 
         public async Task<SysUser> LoginToGetUserAsync(LoginModel model)
         {
-            model.Password = EncryUtils.AESEncrypt(model.Password, _encryptOption.Secret);
-            return await _unitWork.FirstOrDefaultAsync<SysUser>(c => c.Account == model.Account && c.Password == model.Password);
+            var user = await _unitWork.FirstOrDefaultAsync<SysUser>(c => c.Account == model.Account);
+            if (user == null || !Pbkdf2Hasher.VerifyPassword(model.Password, user.Password))
+            {
+                return null;
+            }
+            return user;
         }
     }
 }

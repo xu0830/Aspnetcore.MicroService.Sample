@@ -9,10 +9,10 @@ namespace MicroService.Models.DTOS
 {
     public record LoginModel
     {
-        [Required]
+        [Required(ErrorMessage = "账号不能为空")]
         public required string Account { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "密码不能为空")]
         public required string Password { get; set; }
     }
 }
