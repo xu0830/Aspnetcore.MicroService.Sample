@@ -7,9 +7,11 @@ using MicroService.Repository.@interface;
 using MicroService.User.Service.IService;
 using MicroService.User.Service.Service;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Steeltoe.Discovery.Client;
 using Steeltoe.Discovery.Consul;
+using Winton.Extensions.Configuration.Consul;
 namespace MicroService.User.API
 {
     public class Program
@@ -17,6 +19,35 @@ namespace MicroService.User.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+                        
+            var application = builder.Environment.ApplicationName;
+
+            builder.Configuration.AddConsul("user-service/appsettings.Development.json", options =>
+            {
+                //Configure Consul Connection Details, i.e. Address, DataCenter, Certificates and Auth details
+                options.ConsulConfigurationOptions =
+                    cco => { 
+                        cco.Address = new Uri($"http://{builder.Configuration["Consul:Host"]}:{builder.Configuration["Consul:Port"]}"); 
+                    };
+
+                options.Optional = true;
+                
+                options.PollWaitTime = TimeSpan.FromSeconds(5);
+                
+                options.ReloadOnChange = true;
+                
+                options.OnLoadException = (consulLoadExceptionContext) =>
+                {
+                    Console.WriteLine($"Error onLoadException {consulLoadExceptionContext.Exception.Message} and stacktrace {consulLoadExceptionContext.Exception.StackTrace}");
+                    throw consulLoadExceptionContext.Exception;
+                };
+                
+                options.OnWatchException = (consulWatchExceptionContext) =>
+                {
+                    Console.WriteLine($"Unable to watchChanges in Consul due to {consulWatchExceptionContext.Exception.Message}");
+                    return TimeSpan.FromSeconds(2);
+                };
+            });
 
             builder.Services.AddControllers();
 
@@ -39,7 +70,12 @@ namespace MicroService.User.API
 
             #region 数据库服务
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseMySql(builder.Configuration.GetConnectionString("AppDbContext"), new MySqlServerVersion(new Version(8, 0, 11))));
+            {
+                var d = builder.Configuration.GetConnectionString("AppDbContext");
+                options.UseMySql(builder.Configuration.GetConnectionString("AppDbContext"), 
+                    new MySqlServerVersion(new Version(8, 0, 11)));
+            });
+
             builder.Services.AddScoped(typeof(IUnitWork<>), typeof(UnitWork<>));
             #endregion
 
@@ -57,6 +93,8 @@ namespace MicroService.User.API
             }).AddEntityFramework(); //显示SQL语句及耗时
 
             var app = builder.Build();
+
+           
 
             app.UseAuthorization();
 

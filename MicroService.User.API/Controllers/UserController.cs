@@ -11,14 +11,18 @@ namespace MicroService.User.API.Controllers
     {
         private IUserService _userService;
 
-        public UserController(IUserService userService)
+        private IConfiguration _configuration;
+
+        public UserController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpPost("loginGetUser")]
         public async Task<ResponseResult<SysUser>> LoginGetUser([FromBody] LoginModel model)
         {
+            var d = _configuration["key1"];
             return ResultOk(await _userService.LoginToGetUserAsync(model));
         }
 
