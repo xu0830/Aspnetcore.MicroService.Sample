@@ -42,11 +42,6 @@ namespace MicroService.Auth
 
             builder.Services.AddScoped<ITokenService, TokenService>();
 
-            //builder.Services.AddHttpClient("user", client =>
-            //{
-            //    client.BaseAddress = new Uri("http://user-service/");
-            //});
-
             builder.Services.AddSingleton(typeof(ResilienceClientFactory), sp =>
             {
                 var logger = sp.GetRequiredService<ILogger<ResilienceHttpClient>>();
@@ -124,6 +119,9 @@ namespace MicroService.Auth
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // ½¡¿µ¼ì²é¶Ëµã
+            app.MapGet("/health", () => Results.Ok("Healthy"));
 
             app.Run();
         }

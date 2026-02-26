@@ -39,14 +39,15 @@ namespace MicroService.User.Service.Service
             return await _unitWork.SaveAsync() > 0;
         }
 
-        public async Task<SysUser> LoginToGetUserAsync(LoginModel model)
+        public async Task<SysUser?> LoginToGetUserAsync(LoginModel model)
         {
-            var user = await _unitWork.FirstOrDefaultAsync<SysUser>(c => c.Account == model.Account);
-            if (user == null || !Pbkdf2Hasher.VerifyPassword(model.Password, user.Password))
-            {
-                return null;
-            }
-            return user;
+            //var user = await _unitWork.FirstOrDefaultAsync<SysUser>(c => c.Account == model.Account);
+            //if (user == null || !Pbkdf2Hasher.VerifyPassword(model.Password, user.Password))
+            //{
+            //    return null;
+            //}
+            //return user;
+            return new SysUser { Id = 1, Account = "1", Password = "123", Phone = "1342", RealName = "jay" };
         }
     }
 }

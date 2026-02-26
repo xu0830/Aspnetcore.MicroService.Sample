@@ -10,7 +10,7 @@ namespace MicroService.User.Service.IService
 {
     public interface IUserService
     {
-        Task<SysUser> LoginToGetUserAsync(LoginModel loginModel);
+        Task<SysUser?> LoginToGetUserAsync(LoginModel loginModel);
         Task<bool> AddUser(RegisterModel user);
     }
 }

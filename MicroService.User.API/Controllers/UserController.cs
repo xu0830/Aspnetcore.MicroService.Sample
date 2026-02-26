@@ -2,6 +2,7 @@
 using MicroService.Models.DTOS;
 using MicroService.Models.Entity;
 using MicroService.User.Service.IService;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MicroService.User.API.Controllers
@@ -22,6 +23,7 @@ namespace MicroService.User.API.Controllers
         [HttpPost("loginGetUser")]
         public async Task<ResponseResult<SysUser>> LoginGetUser([FromBody] LoginModel model)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress;
             var d = _configuration["key1"];
             return ResultOk(await _userService.LoginToGetUserAsync(model));
         }

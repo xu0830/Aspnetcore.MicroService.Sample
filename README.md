@@ -4,6 +4,6 @@ Ocelot + Consul + Polly + EF Core
 
 ### Consul
 
-主动发送心跳包 
+主动发送心跳包，保活
 
 `await _client.Agent.PassTTL(serviceId, "ttl");`
